@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+  --accent: #00f2ff;
+  --accent-glow: rgba(0, 242, 255, 0.5);
+}
+
+@theme {
+  --font-sans: "Geist", "Inter", sans-serif;
+}
+
+/* ── Base ───────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  /* Prevent layout shift from scrollbar appearing */
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Better touch scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Custom Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar      { width: 5px; }
+::-webkit-scrollbar-track{ background: #000; }
+::-webkit-scrollbar-thumb{
+  background:    #111;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background:  var(--accent);
+  box-shadow:  0 0 10px var(--accent-glow);
+}
+
+/* ── Glassmorphism ──────────────────────────────────────────────── */
+.glass-panel {
+  background:          rgba(10, 10, 10, 0.7);
+  backdrop-filter:     blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border:              1px solid rgba(255, 255, 255, 0.05);
+}
+
+.neon-glow   { text-shadow: 0 0 15px var(--accent-glow); }
+.neon-border {
+  box-shadow:  0 0 20px rgba(0,242,255,0.1), inset 0 0 10px rgba(0,242,255,0.05);
+  border-color: rgba(0,242,255,0.2);
+}
+
+/* ── Canvas — 3D sequence only ──────────────────────────────────── */
+/* Only target the sequence canvas, not the particle canvas */
+canvas.sequence-canvas {
+  filter: contrast(1.06) brightness(0.9);
+  image-rendering: -webkit-optimize-contrast; /* Safari */
+  image-rendering: crisp-edges;
+}
+
+/* ── Film Grain ─────────────────────────────────────────────────── */
+.film-grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: grainShift 0.5s steps(1) infinite;
+  /* Promote to own layer so it never triggers repaints on main content */
+  will-change: background-position;
+}
+
+@keyframes grainShift {
+  0%   { background-position:     0      0;   }
+  25%  { background-position:  -50px  -50px; }
+  50%  { background-position:   50px   50px; }
+  75%  { background-position:  -30px   60px; }
+  100% { background-position:   20px  -40px; }
+}
+
+/* ── Cursor glow (ScrollSequence internal follow-glow) ──────────── */
+.cursor-glow {
+  position:      fixed;
+  width:         380px;
+  height:        380px;
+  border-radius: 50%;
+  background:    radial-gradient(circle, rgba(0,242,255,0.065) 0%, transparent 70%);
+  pointer-events: none;
+  transform:     translate(-50%, -50%);
+  z-index:       5;
+  mix-blend-mode: screen;
+  will-change:   left, top;
+  /* Use transform instead of left/top for smoother motion */
+  transition:    left 0.06s linear, top 0.06s linear;
+}
+
+/* ── Custom cursor: hide native on pointer-fine (desktop) ────────── */
+@media (pointer: fine) {
+  *, *::before, *::after {
+    cursor: none !important;
+  }
+}
+
+/* ── Touch devices: show native cursor, hide custom UI ────────────── */
+@media (pointer: coarse) {
+  [aria-hidden="true"].fixed {
+    display: none !important;
+  }
+}
+
+/* ── Tech Grid ───────────────────────────────────────────────────── */
+.tech-grid {
+  background-image:
+    linear-gradient(rgba(0, 242, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 242, 255, 0.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ── Text Utilities ──────────────────────────────────────────────── */
+.text-cinematic {
+  letter-spacing: 0.8em;
+  text-shadow:    0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* ── Reduced Motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  /* Pause all non-essential animations */
+  .film-grain::after,
+  .cursor-glow {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Let Framer Motion still handle layout — only CSS animations paused */
+  *, *::before, *::after {
+    animation-duration:   0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:  0.01ms !important;
+    scroll-behavior:      auto !important;
+  }
+}
+
+/* ── Mobile Overrides ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Prevent text from being too small on mobile */
+  .text-cinematic { letter-spacing: 0.3em; }
+
+  /* Scrollbar hidden on mobile — wastes space */
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+}
