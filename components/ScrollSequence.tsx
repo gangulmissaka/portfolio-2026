@@ -8,9 +8,6 @@ const FRAME_COUNT = 120;
 const RING_R      = 45;
 const RING_CIRC   = 2 * Math.PI * RING_R;
 
-// Next.js basePath does NOT apply to canvas Image() objects — we must prepend
-// the path manually. NEXT_PUBLIC_BASE_PATH is set in next.config.ts via env.
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 
 
@@ -73,7 +70,7 @@ export default function ScrollSequence() {
     imagesRef.current = new Array(FRAME_COUNT);
     for (let i = 1; i <= FRAME_COUNT; i++) {
       const img = new Image();
-      img.src = `${BASE_PATH}/sequence/ezgif-frame-${String(i).padStart(3, '0')}.jpg`;
+      img.src = `/sequence/ezgif-frame-${String(i).padStart(3, '0')}.jpg`;
 
       const done = () => {
         loaded++;
