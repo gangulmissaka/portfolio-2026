@@ -11,26 +11,46 @@ export default function HolographicPanel() {
     let animationFrameId: number;
     let targetIntensity = 0;
     let currentIntensity = 0;
+    
+    // Flag for mobile/touch devices
+    const isMobile = typeof window !== 'undefined' && window.matchMedia("(pointer: coarse)").matches;
+    let autoPulseTime = 0;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleInput = (clientX: number, clientY: number) => {
       if (!panelRef.current) return;
       const rect = panelRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       
       const distance = Math.sqrt(
-        Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2)
+        Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2)
       );
       
-      // Proximity range threshold
-      const maxDistance = 600;
+      const maxDistance = isMobile ? 400 : 600;
       let rawIntensity = Math.max(0, 1 - distance / maxDistance);
-      
-      // Easing for smoother ramp up when cursor gets close
       targetIntensity = Math.pow(rawIntensity, 1.8);
     };
 
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isMobile) handleInput(e.clientX, e.clientY);
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        handleInput(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
     const updateIntensity = () => {
+      if (isMobile) {
+        // On touch devices, automatically oscillate intensity so the effect is always visible
+        autoPulseTime += 0.015;
+        // Oscillates smoothly between 0.3 and 0.8
+        const ambientIntensity = 0.55 + Math.sin(autoPulseTime) * 0.25;
+        // If user is touching near it, targetIntensity might be higher
+        targetIntensity = Math.max(ambientIntensity, targetIntensity * 0.95); // slowly decay touch intensity
+      }
+
       currentIntensity += (targetIntensity - currentIntensity) * 0.08;
       
       // Directly modify CSS variables for high-performance direct DOM updates
@@ -47,10 +67,15 @@ export default function HolographicPanel() {
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchMove, { passive: true });
+    
     animationFrameId = requestAnimationFrame(updateIntensity);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchstart', handleTouchMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

@@ -27,12 +27,15 @@ export default function ScrollSequence() {
 
   // Cursor follow
   useEffect(() => {
+    const isMobile = typeof window !== 'undefined' && window.matchMedia("(pointer: coarse)").matches;
+    if (isMobile) return; // Don't track cursor on mobile devices
+    
     const move = (e: MouseEvent) => {
       if (!glowRef.current) return;
       glowRef.current.style.left = `${e.clientX}px`;
       glowRef.current.style.top  = `${e.clientY}px`;
     };
-    window.addEventListener('mousemove', move);
+    window.addEventListener('mousemove', move, { passive: true });
     return () => window.removeEventListener('mousemove', move);
   }, []);
 
