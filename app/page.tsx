@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import ScrollSequence from '@/components/ScrollSequence';
+import HolographicPanel from '@/components/HolographicPanel';
 import { Mail, ExternalLink, Code, Layers, Shield, Palette, MapPin } from 'lucide-react';
 import { GitHubIcon, LinkedInIcon } from '@/components/icons';
 
@@ -77,7 +78,7 @@ export default function Home() {
                   HOW I <br /><span className="text-white/20">BUILD</span>
                 </h2>
               </Reveal>
-              <div className="grid md:grid-cols-2 gap-12 lg:gap-24 items-start">
+              <div className="grid lg:grid-cols-3 gap-12 lg:gap-16 items-start">
                 <Reveal delay={0.15}>
                   <p className="text-2xl text-white/40 font-medium leading-snug border-l-4 border-white/10 pl-8">
                     Every project starts with deep analysis, followed by disciplined architecture,
@@ -101,6 +102,11 @@ export default function Home() {
                     </Reveal>
                   ))}
                 </div>
+
+                {/* Holographic Display Panel */}
+                <Reveal delay={0.3} className="flex justify-center self-center w-full md:col-span-2 lg:col-span-1 mt-4 lg:mt-0">
+                  <HolographicPanel />
+                </Reveal>
               </div>
             </section>
 
